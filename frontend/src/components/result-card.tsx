@@ -1,6 +1,6 @@
 import { ScoreBar } from "@/components/score-bar";
 import { StatusBadge } from "@/components/status-badge";
-import { getRiskTier } from "@/lib/format";
+import { formatDateTime, getRiskTier } from "@/lib/format";
 import { ScoreResponse } from "@/lib/types";
 
 type ResultCardProps = {
@@ -83,6 +83,20 @@ export function ResultCard({ result, isLoading, error }: ResultCardProps) {
               tone={result.logged_for_review ? "warning" : "neutral"}
             />
           </div>
+        </div>
+
+        <div className="rounded-2xl bg-zinc-50 p-4">
+          <p className="text-xs uppercase tracking-wide text-zinc-500">Risk tier</p>
+          <p className="mt-2 text-base font-semibold text-zinc-900">
+            {tier === "high" ? "High" : tier === "medium" ? "Medium" : "Low"}
+          </p>
+        </div>
+
+        <div className="rounded-2xl bg-zinc-50 p-4">
+          <p className="text-xs uppercase tracking-wide text-zinc-500">Scored at</p>
+          <p className="mt-2 text-base font-semibold text-zinc-900">
+            {formatDateTime(new Date().toISOString())}
+          </p>
         </div>
       </div>
 

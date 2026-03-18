@@ -8,27 +8,40 @@ type SuspiciousTableProps = {
   items: SuspiciousTransactionItem[];
 };
 
+type SortKey = "created_at" | "risk_score" | "amount";
+
 export function SuspiciousTable({ items }: SuspiciousTableProps) {
   const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
 
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    if (!q) return items;
+    const base = !q
+      ? items
+      : items.filter((item) => {
+          return (
+            item.transaction_id.toLowerCase().includes(q) ||
+            item.customer_id.toLowerCase().includes(q) ||
+            item.merchant_id.toLowerCase().includes(q) ||
+            item.country.toLowerCase().includes(q)
+          );
+        });
 
-    return items.filter((item) => {
-      return (
-        item.transaction_id.toLowerCase().includes(q) ||
-        item.customer_id.toLowerCase().includes(q) ||
-        item.merchant_id.toLowerCase().includes(q) ||
-        item.country.toLowerCase().includes(q)
-      );
+    return [...base].sort((a, b) => {
+      if (sortKey === "created_at") {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      if (sortKey === "risk_score") {
+        return b.risk_score - a.risk_score;
+      }
+      return b.amount - a.amount;
     });
-  }, [items, query]);
+  }, [items, query, sortKey]);
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-zinc-900">
             Recent suspicious activity
@@ -38,14 +51,25 @@ export function SuspiciousTable({ items }: SuspiciousTableProps) {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <input
             type="text"
             placeholder="Search transaction, customer, merchant, country"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full min-w-[260px] rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+            className="w-full min-w-[360px] rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
           />
+
+          <select
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            className="rounded-xl border border-zinc-300 px-3 py-2 text-sm outline-none transition focus:border-zinc-900"
+          >
+            <option value="created_at">Sort: newest</option>
+            <option value="risk_score">Sort: highest risk</option>
+            <option value="amount">Sort: highest amount</option>
+          </select>
+
           <span className="whitespace-nowrap text-sm text-zinc-500">
             {filteredItems.length} records
           </span>
@@ -70,7 +94,10 @@ export function SuspiciousTable({ items }: SuspiciousTableProps) {
             </thead>
             <tbody>
               {filteredItems.map((item) => (
-                <tr key={item.id} className="bg-zinc-50 text-sm text-zinc-700">
+                <tr
+                  key={item.id}
+                  className="bg-zinc-50 text-sm text-zinc-700 transition hover:bg-zinc-100"
+                >
                   <td className="rounded-l-xl px-3 py-3 font-medium text-zinc-900">
                     {item.transaction_id}
                   </td>

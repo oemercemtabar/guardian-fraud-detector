@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ResultCard } from "@/components/result-card";
 import { StatusBadge } from "@/components/status-badge";
 import { SuspiciousTable } from "@/components/suspicious-table";
 import { TransactionForm } from "@/components/transaction-form";
+import { formatCurrency } from "@/lib/format";
 import {
   fetchHealth,
   fetchSuspiciousTransactions,
@@ -89,6 +90,24 @@ export default function HomePage() {
 
   const apiTone = health?.status === "ok" ? "success" : "warning";
 
+  const metrics = useMemo(() => {
+    const totalFlagged = items.length;
+    const avgRisk =
+      totalFlagged > 0
+        ? items.reduce((sum, item) => sum + item.risk_score, 0) / totalFlagged
+        : 0;
+    const highestAmount =
+      totalFlagged > 0 ? Math.max(...items.map((item) => item.amount)) : 0;
+    const latest = totalFlagged > 0 ? items[0] : null;
+
+    return {
+      totalFlagged,
+      avgRisk,
+      highestAmount,
+      latestTransactionId: latest?.transaction_id ?? "n/a",
+    };
+  }, [items]);
+
   return (
     <main className="min-h-screen bg-zinc-50">
       <div className="mx-auto max-w-7xl px-6 py-6">
@@ -142,6 +161,19 @@ export default function HomePage() {
           ) : null}
         </header>
 
+        <section className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Total flagged" value={String(metrics.totalFlagged)} />
+          <MetricCard label="Average risk" value={metrics.avgRisk.toFixed(4)} />
+          <MetricCard
+            label="Highest amount"
+            value={formatCurrency(metrics.highestAmount, "EUR")}
+          />
+          <MetricCard
+            label="Latest transaction"
+            value={metrics.latestTransactionId}
+          />
+        </section>
+
         {isBootLoading ? (
           <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-sm text-zinc-500 shadow-sm">
             Loading dashboard...
@@ -160,5 +192,20 @@ export default function HomePage() {
         )}
       </div>
     </main>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <p className="text-xs uppercase tracking-wide text-zinc-500">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-zinc-950">{value}</p>
+    </div>
   );
 }

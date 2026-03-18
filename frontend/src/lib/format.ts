@@ -24,6 +24,20 @@ export function formatDateTime(value: string) {
   }
 }
 
+export function formatDateTimeLocalInput(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  const hours = String(value.getHours()).padStart(2, "0");
+  const minutes = String(value.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+export function toIsoFromLocalDateTime(value: string) {
+  const date = new Date(value);
+  return date.toISOString();
+}
+
 export function getRiskTier(score: number): "low" | "medium" | "high" {
   if (score >= 0.65) return "high";
   if (score >= 0.35) return "medium";
