@@ -72,7 +72,8 @@ export function TransactionForm({
     >
       <h2 className="text-lg font-semibold text-zinc-900">Transaction input</h2>
       <p className="mt-1 text-sm text-zinc-500">
-        Submit a transaction for real-time fraud risk scoring.
+        Submit a transaction for real-time fraud risk scoring. Use the default demo
+        values or edit fields to test different scenarios.
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -168,8 +169,7 @@ export function TransactionForm({
       <button
         type="submit"
         disabled={!canSubmit || isLoading}
-        className="mt-6 inline-flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
+        className="mt-6 inline-flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-50"      >
         {isLoading ? "Scoring..." : "Score transaction"}
       </button>
     </form>
